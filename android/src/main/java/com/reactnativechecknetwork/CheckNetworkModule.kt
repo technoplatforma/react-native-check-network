@@ -1,24 +1,36 @@
 package com.reactnativechecknetwork
 
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.*
+import com.facebook.react.modules.core.DeviceEventManagerModule
 
 class CheckNetworkModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+  private val onNetworkChangeEventName = "onNetworkChange"
+  private val manager = NetworkReachabilityManager()
 
-    override fun getName(): String {
-        return "CheckNetwork"
+  override fun getName(): String {
+    return "CheckNetwork"
+  }
+
+
+
+  @ReactMethod
+  fun startListen() {
+    manager.startListening(reactApplicationContext)
+    manager.listener = {
+      reactApplicationContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+        ?.emit(onNetworkChangeEventName, Arguments.createMap().apply {
+          this.putBoolean("isReachable", it)
+        })
     }
+  }
 
-    // Example method
-    // See https://reactnative.dev/docs/native-modules-android
-    @ReactMethod
-    fun multiply(a: Int, b: Int, promise: Promise) {
-    
-      promise.resolve(a * b)
-    
-    }
+  @ReactMethod
+  fun stopListen() {
+    manager.stop(reactApplicationContext)
+  }
 
-    
+  @ReactMethod
+  fun isReachable(promise: Promise) {
+    promise.resolve(manager.isNetworkAvailable(reactApplicationContext))
+  }
 }
