@@ -1,5 +1,7 @@
 # react-native-check-network
 
+Forked from: https://github.com/Connect-Club/react-native-check-network/tree/master
+
 Check network accessability
 
 ## Installation
